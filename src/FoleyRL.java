@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.CyclicBarrier;
 
 public class FoleyRL {
 
@@ -59,17 +60,17 @@ public class FoleyRL {
     } catch (FileNotFoundException e) {
 
       System.out.println("File is not there ya dummy!");
-      System.exit(0);
+      e.printStackTrace();
+      return;
     }
 
     numThreads = rows;
 
+    CyclicBarrier barrier = new CyclicBarrier(numThreads);
+
+    ThreadCoordinator overlord = new ThreadCoordinator(numThreads);
+
     int regionLabel = 0;
-
-    for (int i = 0; i < rows; i++) {
-
-      System.out.println(pixels.get(i));
-    }
 
     // Initialize the matrix of regions
     for (int row = 0; row < rows; row++) {
@@ -86,13 +87,39 @@ public class FoleyRL {
       regions.add(temp);
     }
 
-    boolean done = false;
-
     ArrayList<Thread> threads = new ArrayList<Thread>();
+
+    // And they're off to the races! (Except not really, I don't have races in my program ;)
+    for (int row = 0; row < rows; row++) {
+
+      threads.add(new Thread(new Topographer(regions, row, pixels.get(row), barrier, overlord)));
+    }
+
+    for (Thread thread : threads) {
+
+      thread.start();
+    }
+
+    for (Thread thread : threads) {
+
+      try {
+
+        thread.join();
+      } catch (InterruptedException e) {
+
+        e.printStackTrace();
+        return;
+      }
+    }
 
     for (int row = 0; row < rows; row++) {
 
-      threads.add(new Thread());
+      for (int col = 0; col < cols; col++) {
+
+        System.out.format("%2d", regions.get(row).get(col).get());
+      }
+
+      System.out.println();
     }
   }
 }
