@@ -66,6 +66,7 @@ public class FoleyRL {
 
     numThreads = rows;
 
+    // Initialize the special objects
     CyclicBarrier barrier = new CyclicBarrier(numThreads);
 
     ThreadCoordinator overlord = new ThreadCoordinator(numThreads);
@@ -89,17 +90,20 @@ public class FoleyRL {
 
     ArrayList<Thread> threads = new ArrayList<Thread>();
 
-    // And they're off to the races! (Except not really, I don't have races in my program ;)
+    // On your marks... get ready.. aaanddd...
     for (int row = 0; row < rows; row++) {
 
-      threads.add(new Thread(new Topographer(regions, row, pixels.get(row), barrier, overlord)));
+      threads.add(new Thread(new Topographer(regions, pixels, row, barrier, overlord)));
     }
 
+    // GO! They're off to the races! Except my program doesn't have any races ;)
     for (Thread thread : threads) {
 
       thread.start();
     }
 
+    // We have to join in this solution. This way we can print out the correct
+    //  Region Label matrix at the end.
     for (Thread thread : threads) {
 
       try {
@@ -112,11 +116,13 @@ public class FoleyRL {
       }
     }
 
+    // Print all numbers out
+    // Note, only built to handle up to double digit numbers nicely
     for (int row = 0; row < rows; row++) {
 
       for (int col = 0; col < cols; col++) {
 
-        System.out.format("%2d", regions.get(row).get(col).get());
+        System.out.format("%2d ", regions.get(row).get(col).get());
       }
 
       System.out.println();

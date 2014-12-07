@@ -15,11 +15,11 @@ public class Topographer implements Runnable {
   // Shared matrix of region labels
   ArrayList<ArrayList<ImplicitlyLockingIndex>> regions;
 
+  // Shared matrix of pixels
+  ArrayList<ArrayList<Integer>> pixels;
+
   // Row number
   int rowNum;
-
-  // Read only row of pixels
-  final ArrayList<Integer> row;
 
   // Shared reusable barrier
   final CyclicBarrier barrier;
@@ -34,17 +34,18 @@ public class Topographer implements Runnable {
    * Constructor
    *
    * @param regions  Shared matrix of region labels
+   * @param pixels   Shared matrix of pixels
    * @param rowNum   Row number in the matrix
-   * @param row      Read only row of pixels
    * @param barrier  Reusable barrier
    * @param overlord Signals to continue or not
    */
-  public Topographer(ArrayList<ArrayList<ImplicitlyLockingIndex>> regions, int rowNum,
-                     ArrayList<Integer> row, CyclicBarrier barrier, ThreadCoordinator overlord) {
+  public Topographer(ArrayList<ArrayList<ImplicitlyLockingIndex>> regions,
+                     ArrayList<ArrayList<Integer>> pixels, int rowNum,
+                     CyclicBarrier barrier, ThreadCoordinator overlord) {
 
     this.regions = regions;
+    this.pixels = pixels;
     this.rowNum = rowNum;
-    this.row = row;
     this.barrier = barrier;
     this.overlord = overlord;
   }
@@ -76,26 +77,39 @@ public class Topographer implements Runnable {
    */
   private void labelRegions() {
 
-    for (int col = 0; col < row.size(); col++) {
+    noChange = true;
 
-      int regionLabel = max(col);
+    for (int col = 0; col < pixels.get(rowNum).size(); col++) {
+
+      // the max region, or -1 if there are no matches and/or out of bounds
+      int regionLabel = max(col, pixels.get(rowNum).get(col));
 
       // test to see if the numbers are different
-      if (regionLabel != regions.get(rowNum).get(col).get()) {
+      if ((regionLabel > regions.get(rowNum).get(col).get()) && (regionLabel != -1)) {
 
         // They are, so set it and a change was made
         regions.get(rowNum).get(col).set(regionLabel);
+
         noChange = false;
       }
+    }
 
-      if (noChange) {
+    if (noChange) {
 
-        overlord.doneFirstTime();
-      }
+      // Signal the coordinator that we made it through without changes
+      overlord.doneFirstTime();
     }
   }
 
-  private int max(int col) {
+  /**
+   * Finds the maximum region number of any matching pixels, or returns -1 if there are no matches
+   *  or neighbors are out of bounds
+   *
+   * @param col the current row index
+   * @param num the pixel to compare against
+   * @return the maximum region label of the num's neighbors
+   */
+  private int max(int col, int num) {
 
     /* Given a matrix of [m x n]  These are the neighbors.
      *  The 0th row of the matrix is the top row,
@@ -105,42 +119,71 @@ public class Topographer implements Runnable {
      */
     int up, down, left, right;
 
+    /*
+     * Check if we're in bounds, and then compare the neighbor numbers
+     *  If they match, then keep track of the region number
+     *  to find the maximum region number
+     */
+    // up rowNum - 1
     if ((rowNum - 1) < 0) {
 
-      up = 0;
+      up = -1;
     } else {
 
-      up = regions.get(rowNum - 1).get(col).get();
+      if (pixels.get(rowNum - 1).get(col) == num) {
+
+        up = regions.get(rowNum - 1).get(col).get();
+      } else {
+
+        up = -1;
+      }
     }
 
-    if ((rowNum + 1) > regions.size()) {
+    // down rowNum + 1
+    if ((rowNum + 1) < regions.size()) {
 
-      down = 0;
+      if (pixels.get(rowNum + 1).get(col) == num) {
+
+        down = regions.get(rowNum + 1).get(col).get();
+      } else {
+
+        down = -1;
+      }
     } else {
 
-      down = regions.get(rowNum + 1).get(col).get();
+      down = -1;
     }
 
+    // left col - 1
     if ((col - 1) < 0) {
 
-      left = 0;
+      left = -1;
     } else {
 
-      left = regions.get(rowNum).get(col - 1).get();
+      if (pixels.get(rowNum).get(col - 1) == num) {
+
+        left = regions.get(rowNum).get(col - 1).get();
+      } else {
+
+        left = -1;
+      }
     }
 
-    if ((col + 1) > row.size()) {
+    // right col + 1
+    if ((col + 1) < pixels.get(rowNum).size()) {
 
-      right = 0;
+      if (pixels.get(rowNum).get(col + 1) == num) {
+
+        right = regions.get(rowNum).get(col + 1).get();
+      } else {
+
+        right = -1;
+      }
     } else {
 
-      right = regions.get(rowNum).get(col + 1).get();
+      right = -1;
     }
 
-    return Math.max(up,
-      Math.max(down,
-        Math.max(left,
-          right)));
+    return Math.max(up, Math.max(down, Math.max(left, right)));
   }
-
 }
