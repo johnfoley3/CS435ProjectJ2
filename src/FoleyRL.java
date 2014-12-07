@@ -28,7 +28,7 @@ public class FoleyRL {
     int numThreads = 0;
 
     ArrayList<ArrayList<Integer>> pixels = new ArrayList<ArrayList<Integer>>();
-    ArrayList<ArrayList<ImplicitlyLockingIndices>> regions = new ArrayList<ArrayList<ImplicitlyLockingIndices>>();
+    ArrayList<ArrayList<ImplicitlyLockingIndex>> regions = new ArrayList<ArrayList<ImplicitlyLockingIndex>>();
 
     try {
 
@@ -64,9 +64,35 @@ public class FoleyRL {
 
     numThreads = rows;
 
+    int regionLabel = 0;
+
     for (int i = 0; i < rows; i++) {
 
       System.out.println(pixels.get(i));
+    }
+
+    // Initialize the matrix of regions
+    for (int row = 0; row < rows; row++) {
+
+      ArrayList<ImplicitlyLockingIndex> temp = new ArrayList<ImplicitlyLockingIndex>();
+
+      for (int col = 0; col < cols; col++) {
+
+        temp.add(new ImplicitlyLockingIndex(regionLabel));
+
+        regionLabel++;
+      }
+
+      regions.add(temp);
+    }
+
+    boolean done = false;
+
+    ArrayList<Thread> threads = new ArrayList<Thread>();
+
+    for (int row = 0; row < rows; row++) {
+
+      threads.add(new Thread());
     }
   }
 }

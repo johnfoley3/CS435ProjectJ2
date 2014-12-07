@@ -4,14 +4,14 @@
  *
  * This class represents an index that can be read from and set to atomically
  */
-public class ImplicitlyLockingIndices {
+public class ImplicitlyLockingIndex {
 
   private int num;
 
   /**
    * Create a new Implicitly locking index with a default value
    */
-  public ImplicitlyLockingIndices() {
+  public ImplicitlyLockingIndex() {
 
     num = 0;
   }
@@ -21,7 +21,7 @@ public class ImplicitlyLockingIndices {
    *
    * @param num initial value
    */
-  public ImplicitlyLockingIndices(int num) {
+  public ImplicitlyLockingIndex(int num) {
 
     this.num = num;
   }
