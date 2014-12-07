@@ -1,5 +1,6 @@
 /**
- * Created by johnfoley on 12/6/14.
+ * @author John Foley <jpf7324@truman.edu>
+ * @date 12/6/14
  *
  * This class represents an index that can be read from and set to atomically
  */
@@ -18,7 +19,7 @@ public class ImplicitlyLockingIndices {
   /**
    * Create a new Implicitly locking index with an initial value.
    *
-   * @param num
+   * @param num initial value
    */
   public ImplicitlyLockingIndices(int num) {
 

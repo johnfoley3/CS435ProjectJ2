@@ -1,5 +1,8 @@
 /**
- * Created by John Foley on 12/6/14.
+ * @author John Foley <jpf7324@truman.edu>
+ * @date 12/6/14
+ *
+ * The main class to run a concurrent solution the region labeling problem in Java.
  */
 
 import java.io.File;
