@@ -69,7 +69,7 @@ public class FoleyRL {
     // Initialize the special objects
     CyclicBarrier barrier = new CyclicBarrier(numThreads);
 
-    ThreadCoordinator overlord = new ThreadCoordinator(numThreads, regions);
+    ThreadCoordinator overlord = new ThreadCoordinator(numThreads);
 
     int regionLabel = 0;
 

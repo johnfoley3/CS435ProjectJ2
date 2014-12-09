@@ -12,18 +12,16 @@ public class ThreadCoordinator {
 
   private int doneFirstTimeCount;
   private int numThreads;
-  private ArrayList<ArrayList<ImplicitlyLockingIndex>> regions;
 
   /**
    * Creates a ThreadCoordinator object
    *
    * @param numThreads number of threads to count up to
    */
-  public ThreadCoordinator(int numThreads, ArrayList<ArrayList<ImplicitlyLockingIndex>> regions) {
+  public ThreadCoordinator(int numThreads) {
 
     doneFirstTimeCount = 0;
     this.numThreads = numThreads;
-    this.regions = regions;
   }
 
   /**
@@ -34,18 +32,6 @@ public class ThreadCoordinator {
   public boolean isDone() {
 
     synchronized (this) {
-
-//      // Print all numbers out
-//      // Note, only built to handle up to double digit numbers nicely
-//      for (int row = 0; row < 4; row++) {
-//
-//        for (int col = 0; col < 5; col++) {
-//
-//          System.out.format("%2d ", regions.get(row).get(col).get());
-//        }
-//
-//        System.out.println();
-//      }
 
       // if the amount of threads that finished first time through is equal
       // to the amount of threads, then the solution is complete

@@ -57,7 +57,7 @@ public class Topographer implements Runnable {
 
     while (!overlord.isDone()) {
 
-//      System.out.println("Thread " + rowNum + " says hi.");
+      System.out.println("Thread " + rowNum + " says hi.");
 
       labelRegions();
 
