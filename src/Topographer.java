@@ -13,7 +13,7 @@ import java.util.concurrent.CyclicBarrier;
 public class Topographer implements Runnable {
 
   // Shared matrix of region labels
-  ArrayList<ArrayList<ImplicitlyLockingIndex>> regions;
+  ArrayList<ArrayList<Integer>> regions;
 
   // Shared matrix of pixels
   ArrayList<ArrayList<Integer>> pixels;
@@ -23,6 +23,7 @@ public class Topographer implements Runnable {
 
   // Shared reusable barrier
   final CyclicBarrier barrier;
+  final CyclicBarrier barrier2;
 
   // Signals to continue with the algorithm or not
   ThreadCoordinator overlord;
@@ -39,14 +40,16 @@ public class Topographer implements Runnable {
    * @param barrier  Reusable barrier
    * @param overlord Signals to continue or not
    */
-  public Topographer(ArrayList<ArrayList<ImplicitlyLockingIndex>> regions,
+  public Topographer(ArrayList<ArrayList<Integer>> regions,
                      ArrayList<ArrayList<Integer>> pixels, int rowNum,
-                     CyclicBarrier barrier, ThreadCoordinator overlord) {
+                     CyclicBarrier barrier, CyclicBarrier barrier2,
+                     ThreadCoordinator overlord) {
 
     this.regions = regions;
     this.pixels = pixels;
     this.rowNum = rowNum;
     this.barrier = barrier;
+    this.barrier2 = barrier2;
     this.overlord = overlord;
   }
 
@@ -57,7 +60,16 @@ public class Topographer implements Runnable {
 
     while (!overlord.isDone()) {
 
-      System.out.println("Thread " + rowNum + " says hi.");
+      try {
+
+        barrier2.await();
+      } catch (InterruptedException ex) {
+
+        return;
+      } catch (BrokenBarrierException ex) {
+
+        return;
+      }
 
       labelRegions();
 
@@ -87,10 +99,10 @@ public class Topographer implements Runnable {
       int regionLabel = max(col, pixels.get(rowNum).get(col));
 
       // test to see if the numbers are different
-      if ((regionLabel > regions.get(rowNum).get(col).get()) && (regionLabel != -1)) {
+      if ((regionLabel > regions.get(rowNum).get(col)) && (regionLabel != -1)) {
 
         // They are, so set it and a change was made
-        regions.get(rowNum).get(col).set(regionLabel);
+        regions.get(rowNum).set(col ,regionLabel);
 
         noChange = false;
       }
@@ -134,7 +146,7 @@ public class Topographer implements Runnable {
 
       if (pixels.get(rowNum - 1).get(col) == num) {
 
-        up = regions.get(rowNum - 1).get(col).get();
+        up = regions.get(rowNum - 1).get(col);
       } else {
 
         up = -1;
@@ -146,7 +158,7 @@ public class Topographer implements Runnable {
 
       if (pixels.get(rowNum + 1).get(col) == num) {
 
-        down = regions.get(rowNum + 1).get(col).get();
+        down = regions.get(rowNum + 1).get(col);
       } else {
 
         down = -1;
@@ -164,7 +176,7 @@ public class Topographer implements Runnable {
 
       if (pixels.get(rowNum).get(col - 1) == num) {
 
-        left = regions.get(rowNum).get(col - 1).get();
+        left = regions.get(rowNum).get(col - 1);
       } else {
 
         left = -1;
@@ -176,7 +188,7 @@ public class Topographer implements Runnable {
 
       if (pixels.get(rowNum).get(col + 1) == num) {
 
-        right = regions.get(rowNum).get(col + 1).get();
+        right = regions.get(rowNum).get(col + 1);
       } else {
 
         right = -1;

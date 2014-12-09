@@ -29,7 +29,7 @@ public class FoleyRL {
     int numThreads = 0;
 
     ArrayList<ArrayList<Integer>> pixels = new ArrayList<ArrayList<Integer>>();
-    ArrayList<ArrayList<ImplicitlyLockingIndex>> regions = new ArrayList<ArrayList<ImplicitlyLockingIndex>>();
+    ArrayList<ArrayList<Integer>> regions = new ArrayList<ArrayList<Integer>>();
 
     try {
 
@@ -68,6 +68,7 @@ public class FoleyRL {
 
     // Initialize the special objects
     CyclicBarrier barrier = new CyclicBarrier(numThreads);
+    CyclicBarrier barrier2 = new CyclicBarrier(numThreads);
 
     ThreadCoordinator overlord = new ThreadCoordinator(numThreads);
 
@@ -76,11 +77,11 @@ public class FoleyRL {
     // Initialize the matrix of regions
     for (int row = 0; row < rows; row++) {
 
-      ArrayList<ImplicitlyLockingIndex> temp = new ArrayList<ImplicitlyLockingIndex>();
+      ArrayList<Integer> temp = new ArrayList<Integer>();
 
       for (int col = 0; col < cols; col++) {
 
-        temp.add(new ImplicitlyLockingIndex(regionLabel));
+        temp.add(regionLabel);
 
         regionLabel++;
       }
@@ -93,7 +94,7 @@ public class FoleyRL {
     // On your marks... get ready.. aaanddd...
     for (int row = 0; row < rows; row++) {
 
-      threads.add(new Thread(new Topographer(regions, pixels, row, barrier, overlord)));
+      threads.add(new Thread(new Topographer(regions, pixels, row, barrier, barrier2, overlord)));
     }
 
     // GO! They're off to the races! Except my program doesn't have any races ;)
@@ -122,7 +123,7 @@ public class FoleyRL {
 
       for (int col = 0; col < cols; col++) {
 
-        System.out.format("%2d ", regions.get(row).get(col).get());
+        System.out.format("%2d ", regions.get(row).get(col));
       }
 
       System.out.println();
